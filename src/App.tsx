@@ -441,8 +441,13 @@ export default function App() {
             <div
               style={{
                 position: 'fixed',
+                // something regarding node creation on edge leave
+                left: createMenu.screenX,
+                top: createMenu.screenY,
+                /*
                 left: createMenu.x,
                 top: createMenu.y,
+                */
                 zIndex: 9999,
                 background: '#18181b',
                 border: '1px solid #27272a',
@@ -457,29 +462,34 @@ export default function App() {
                 <button
                   key={nodeType}
                     onClick={() => {
-                    handleAddNode(
-                      nodeType,
-                      {
-                        x: createMenu.x,
-                        y: createMenu.y,
-                      },
-                      createMenu.sourceNodeId,
-                    );
+                      handleAddNode(
+                        nodeType,
+                        {
+                          // something about the adding button on edge leave
+                          x: createMenu.flowX,
+                          y: createMenu.flowY,
+                          /*
+                          x: createMenu.x,
+                          y: createMenu.y,
+                          */
+                        },
+                        createMenu.sourceNodeId,
+                      );
 
-                    setCreateMenu(null);
-                  }}
-                  style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: 10,
-                  borderRadius: 8,
-                  border: 'none',
-                  background: 'transparent',
-                  color: '#fff',
-                  cursor: 'pointer',
-                }}
+                      setCreateMenu(null);
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: 10,
+                      borderRadius: 8,
+                      border: 'none',
+                      background: 'transparent',
+                      color: '#fff',
+                      cursor: 'pointer',
+                    }}
                 >
                 <Icon size={16} style={{ color }} />
                   {label}
