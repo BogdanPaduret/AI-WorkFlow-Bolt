@@ -11,7 +11,7 @@ import {
   type Node,
   type Edge,
   type NodeTypes,
-  type Connection,
+  type FinalConnectionState,
   BackgroundVariant,
 } from '@xyflow/react';
 
@@ -111,21 +111,30 @@ export default function App() {
   );
 
   const onConnectEnd = useCallback(
-    (event: MouseEvent | TouchEvent, connection: Connection) => {
-      if (!connection.source) {
-        return;
-      }
+  (
+    event: MouseEvent | TouchEvent,
+    connectionState: FinalConnectionState,
+  ) => {
+    if (!connectionState.fromNode) {
+      return;
+    }
 
-      const mouseEvent = event as MouseEvent;
+    if (connectionState.isValid) {
+      return;
+    }
 
-      setCreateMenu({
-        x: mouseEvent.clientX,
-        y: mouseEvent.clientY,
-        sourceNodeId: connection.source,
-      });
-    },
-    [],
-  );
+    const mouseEvent = event as MouseEvent;
+
+    console.log('OPEN MENU');
+    
+    setCreateMenu({
+      x: mouseEvent.clientX,
+      y: mouseEvent.clientY,
+      sourceNodeId: connectionState.fromNode.id,
+    });
+  },
+  [],
+);
 
   const onDelete = useCallback(
     (id: string) => {
