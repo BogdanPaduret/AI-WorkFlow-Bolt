@@ -199,52 +199,56 @@ export default function App() {
   }, []);
 
   const runWorkflow = useCallback(() => {
-    setNodes((nds) => {
-      const updated = [...nds];
+  setNodes((nds) => {
+    const updated = nds.map((node) => {
+      const incomingEdge = edges.find(
+        (e) => e.target === node.id
+      );
 
-      edges.forEach((edge) => {
-        const source = updated.find(
-          (n) => n.id === edge.source,
-        );
+      if (!incomingEdge) {
+        return node;
+      }
 
-        const target = updated.find(
-          (n) => n.id === edge.target,
-        );
+      const sourceNode = nds.find(
+        (n) => n.id === incomingEdge.source
+      );
 
-        if (!source || !target) return;
+      if (!sourceNode) {
+        return node;
+      }
 
-        const sourceData =
-          source.data as WorkflowNodeData;
+      const sourceData =
+        sourceNode.data as WorkflowNodeData;
 
-        const targetData =
-          target.data as WorkflowNodeData;
+      const targetData =
+        node.data as WorkflowNodeData;
 
-        if (
-          sourceData.nodeType === 'prompt' &&
-          targetData.nodeType === 'output'
-        ) {
-          console.log('RUNNING');
-          console.log(sourceData);
-          console.log(targetData);
-          
-          const text =
-            (sourceData.config as any).text ??
-            '';
+      if (
+        sourceData.nodeType === 'prompt' &&
+        targetData.nodeType === 'output'
+      ) {
+        const text =
+          (sourceData.config as any).text ?? '';
 
-          target.data = {
-            ...target.data,
+        return {
+          ...node,
+          data: {
+            ...node.data,
             config: {
               output: text,
             },
-          };
-        }
-      });
+          },
+        };
+      }
 
-      persistNodes(updated);
-
-      return updated;
+      return node;
     });
-  }, [edges, setNodes, persistNodes]);
+
+    persistNodes(updated);
+
+    return updated;
+  });
+}, [edges, setNodes, persistNodes]);
 
   const nodesWithCallbacks = nodes.map(
     (node) => ({
