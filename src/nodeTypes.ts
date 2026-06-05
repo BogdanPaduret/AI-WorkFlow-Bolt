@@ -1,4 +1,12 @@
-import { MessageSquare, FileText } from 'lucide-react';
+import {
+  MessageSquare,
+  FileText,
+  Database,
+} from 'lucide-react';
+
+export type InputConfig = {
+  text: string;
+};
 
 export type PromptConfig = {
   text: string;
@@ -9,6 +17,7 @@ export type OutputConfig = {
 };
 
 export type NodeConfig =
+  | InputConfig
   | PromptConfig
   | OutputConfig;
 
@@ -35,6 +44,16 @@ export const NODE_TYPES: Record<
   string,
   NodeTypeDefinition
 > = {
+  input: {
+    nodeType: 'input',
+    label: 'Input',
+    icon: Database,
+    color: '#f97316',
+    defaultConfig: {
+      text: '',
+    },
+  },
+
   prompt: {
     nodeType: 'prompt',
     label: 'Prompt',
