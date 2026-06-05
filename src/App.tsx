@@ -223,6 +223,10 @@ export default function App() {
           sourceData.nodeType === 'prompt' &&
           targetData.nodeType === 'output'
         ) {
+          console.log('RUNNING');
+          console.log(sourceData);
+          console.log(targetData);
+          
           const text =
             (sourceData.config as any).text ??
             '';
