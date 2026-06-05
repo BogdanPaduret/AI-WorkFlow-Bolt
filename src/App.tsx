@@ -142,11 +142,28 @@ export default function App() {
     const mouseEvent = event as MouseEvent;
 
     console.log('OPEN MENU');
+
+    // changes to setCreateMenu()
+
+    const flowPosition = screenToFlowPosition({
+      x: mouseEvent.clientX,
+      y: mouseEvent.clientY,
+    });
+
     setCreateMenu({
+      screenX: mouseEvent.clientX,
+      screenY: mouseEvent.clientY,
+      flowX: flowPosition.x,
+      flowY: flowPosition.y,
+      sourceNodeId: connectionState.fromNode.id,
+    });
+    
+    /*setCreateMenu({
       x: mouseEvent.clientX,
       y: mouseEvent.clientY,
       sourceNodeId: connectionState.fromNode.id,
     });
+    */
   },
   [],
 );
@@ -204,6 +221,8 @@ export default function App() {
     [setNodes, persistNodes],
   );
 
+  // change the handleAddNode
+  
   /*
   const handleAddNode = useCallback(
     (nodeType: string) => {
