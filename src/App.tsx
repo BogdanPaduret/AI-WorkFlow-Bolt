@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import {
   ReactFlow,
   Background,
+  useReactFlow,
   Controls,
   MiniMap,
   addEdge,
@@ -32,6 +33,7 @@ const nodeTypes: NodeTypes = {
 const STORAGE_KEY = 'workflow-builder';
 
 export default function App() {
+  const { screenToFlowPosition } = useReactFlow();
   const [savedNodes, setSavedNodes] =
     useLocalStorage<Node[]>(
       `${STORAGE_KEY}-nodes`,
@@ -51,9 +53,18 @@ export default function App() {
     useEdgesState(savedEdges);
 
   const [createMenu, setCreateMenu] =
+    /*
     useState<{
       x: number;
       y: number;
+      sourceNodeId: string;
+    } | null>(null);
+    */
+    useState<{
+      screenX: number;
+      screenY: number;
+      flowX: number;
+      flowY: number;
       sourceNodeId: string;
     } | null>(null);
 
@@ -126,10 +137,23 @@ export default function App() {
     const mouseEvent = event as MouseEvent;
 
     console.log('OPEN MENU');
-    
+    /*
     setCreateMenu({
       x: mouseEvent.clientX,
       y: mouseEvent.clientY,
+      sourceNodeId: connectionState.fromNode.id,
+    });
+    */
+    const flowPosition = screenToFlowPosition({
+      x: mouseEvent.clientX,
+      y: mouseEvent.clientY,
+    });
+
+    setCreateMenu({
+      screenX: mouseEvent.clientX,
+      screenY: mouseEvent.clientY,
+      flowX: flowPosition.x,
+      flowY: flowPosition.y,
       sourceNodeId: connectionState.fromNode.id,
     });
   },
