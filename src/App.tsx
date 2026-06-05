@@ -278,13 +278,18 @@ export default function App() {
             top: 16,
             right: 16,
             zIndex: 1000,
-            padding: '10px 16px',
-            borderRadius: 8,
-            border: 'none',
+            padding: '10px 18px',
+            borderRadius: '8px',
+            border: '1px solid #3f3f46',
+            background: '#18181b',
+            color: '#fafafa',
+            fontWeight: 600,
             cursor: 'pointer',
+            boxShadow:
+              '0 4px 12px rgba(0,0,0,0.25)',
           }}
         >
-          Run Workflow
+          ▶ Run Workflow
         </button>
 
         <ReactFlow
