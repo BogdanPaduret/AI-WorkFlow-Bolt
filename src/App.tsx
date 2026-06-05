@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import {
   ReactFlow,
   Background,
-  useReactFlow,
+  //useReactFlow,
   Controls,
   MiniMap,
   addEdge,
@@ -32,7 +32,7 @@ const nodeTypes: NodeTypes = {
 
 const STORAGE_KEY = 'workflow-builder';
 
-const { screenToFlowPosition } = useReactFlow();
+//const { screenToFlowPosition } = useReactFlow();
 
 export default function App() {
   const [savedNodes, setSavedNodes] =
@@ -55,12 +55,22 @@ export default function App() {
 
   // replace the create menu
 
+  /*second try
   const [createMenu, setCreateMenu] =
     useState<{
       screenX: number;
       screenY: number;
       flowX: number;
       flowY: number;
+      sourceNodeId: string;
+    } | null>(null);
+  */
+
+  //third try
+  const [createMenu, setCreateMenu] =
+    useState<{
+      screenX: number;
+      screenY: number;
       sourceNodeId: string;
     } | null>(null);
   
@@ -145,6 +155,8 @@ export default function App() {
 
     // changes to setCreateMenu()
 
+    //second try
+    /*
     const flowPosition = screenToFlowPosition({
       x: mouseEvent.clientX,
       y: mouseEvent.clientY,
@@ -155,6 +167,14 @@ export default function App() {
       screenY: mouseEvent.clientY,
       flowX: flowPosition.x,
       flowY: flowPosition.y,
+      sourceNodeId: connectionState.fromNode.id,
+    });
+    */
+
+    //third try
+    setCreateMenu({
+      screenX: mouseEvent.clientX,
+      screenY: mouseEvent.clientY,
       sourceNodeId: connectionState.fromNode.id,
     });
     
@@ -260,6 +280,22 @@ export default function App() {
   );
   */
 
+  //third try
+  const sourceNode = nodes.find(
+    (n) => n.id === createMenu.sourceNodeId,
+  );
+
+  handleAddNode(
+    nodeType,
+    {
+      x: (sourceNode?.position.x ?? 0) + 250,
+      y: sourceNode?.position.y ?? 0,
+    },
+    createMenu.sourceNodeId,
+  );
+  
+  //second try
+  /*
   const handleAddNode = useCallback(
     (
       nodeType: string,
@@ -323,6 +359,7 @@ export default function App() {
       onUpdate,
     ],
   );
+  */
 
   const handleClearAll = useCallback(() => {
     setNodes([]);
