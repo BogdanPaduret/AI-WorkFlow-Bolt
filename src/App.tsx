@@ -32,6 +32,8 @@ const nodeTypes: NodeTypes = {
 
 const STORAGE_KEY = 'workflow-builder';
 
+const { screenToFlowPosition } = useReactFlow();
+
 export default function App() {
   const [savedNodes, setSavedNodes] =
     useLocalStorage<Node[]>(
