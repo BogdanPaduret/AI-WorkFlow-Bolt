@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import {
   ReactFlow,
   Background,
@@ -18,6 +18,7 @@ import '@xyflow/react/dist/style.css';
 import Sidebar from './components/Sidebar';
 import WorkflowNode from './components/WorkflowNode';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { NODE_TYPES, type WorkflowNodeData } from './nodeTypes';
 
 const nodeTypes: NodeTypes = { workflow: WorkflowNode };
 const STORAGE_KEY = 'workflow-builder';
@@ -29,85 +30,86 @@ export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(savedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(savedEdges);
 
-  const persist = useCallback(() => {
-    setNodes((n) => { setSavedNodes(n); return n; });
-    setEdges((e) => { setSavedEdges(e); return e; });
-  }, [setNodes, setEdges, setSavedNodes, setSavedEdges]);
+  const persistNodes = useCallback(
+    (ns: Node[]) => setSavedNodes(ns),
+    [setSavedNodes],
+  );
+  const persistEdges = useCallback(
+    (es: Edge[]) => setSavedEdges(es),
+    [setSavedEdges],
+  );
 
   const handleNodesChange: typeof onNodesChange = useCallback(
-    (changes) => { onNodesChange(changes); persist(); },
-    [onNodesChange, persist],
+    (changes) => { onNodesChange(changes); setNodes((n) => { persistNodes(n); return n; }); },
+    [onNodesChange, setNodes, persistNodes],
   );
 
   const handleEdgesChange: typeof onEdgesChange = useCallback(
-    (changes) => { onEdgesChange(changes); persist(); },
-    [onEdgesChange, persist],
+    (changes) => { onEdgesChange(changes); setEdges((e) => { persistEdges(e); return e; }); },
+    [onEdgesChange, setEdges, persistEdges],
   );
 
   const onConnect: OnConnect = useCallback(
     (connection) => {
       setEdges((eds) => {
         const updated = addEdge({ ...connection, type: 'smoothstep', animated: true }, eds);
-        setSavedEdges(updated);
+        persistEdges(updated);
         return updated;
       });
     },
-    [setEdges, setSavedEdges],
+    [setEdges, persistEdges],
   );
 
   const onDelete = useCallback(
     (id: string) => {
-      setNodes((nds) => { const u = nds.filter((n) => n.id !== id); setSavedNodes(u); return u; });
-      setEdges((eds) => { const u = eds.filter((e) => e.source !== id && e.target !== id); setSavedEdges(u); return u; });
+      setNodes((nds) => { const u = nds.filter((n) => n.id !== id); persistNodes(u); return u; });
+      setEdges((eds) => { const u = eds.filter((e) => e.source !== id && e.target !== id); persistEdges(u); return u; });
     },
-    [setNodes, setEdges, setSavedNodes, setSavedEdges],
+    [setNodes, setEdges, persistNodes, persistEdges],
   );
 
-  const onTextChange = useCallback(
-    (id: string, text: string) => {
-      setNodes((nds) => { const u = nds.map((n) => n.id === id ? { ...n, data: { ...n.data, text } } : n); setSavedNodes(u); return u; });
+  const onUpdate = useCallback(
+    (id: string, patch: Partial<WorkflowNodeData>) => {
+      setNodes((nds) => {
+        const u = nds.map((n) => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n);
+        persistNodes(u);
+        return u;
+      });
     },
-    [setNodes, setSavedNodes],
+    [setNodes, persistNodes],
   );
 
-  const onLabelChange = useCallback(
-    (id: string, label: string) => {
-      setNodes((nds) => { const u = nds.map((n) => n.id === id ? { ...n, data: { ...n.data, label } } : n); setSavedNodes(u); return u; });
+  const handleAddNode = useCallback(
+    (nodeType: string) => {
+      const def = NODE_TYPES[nodeType];
+      if (!def) return;
+      const id = `${nodeType}-${Date.now()}`;
+      const newNode: Node = {
+        id,
+        type: 'workflow',
+        position: { x: 250 + Math.random() * 300, y: 150 + Math.random() * 200 },
+        data: {
+          label: def.label,
+          nodeType,
+          config: { ...def.defaultConfig },
+          onDelete,
+          onUpdate,
+        },
+      };
+      setNodes((nds) => { const u = [...nds, newNode]; persistNodes(u); return u; });
     },
-    [setNodes, setSavedNodes],
+    [setNodes, persistNodes, onDelete, onUpdate],
   );
-
-  const nodeCount = useRef(0);
-
-  const handleAddNode = useCallback(() => {
-    nodeCount.current += 1;
-    const id = `node-${Date.now()}`;
-    const canvasCenter = { x: 250 + Math.random() * 300, y: 150 + Math.random() * 200 };
-    const newNode: Node = {
-      id,
-      type: 'workflow',
-      position: canvasCenter,
-      data: {
-        label: `Node ${nodeCount.current}`,
-        text: '',
-        onDelete,
-        onTextChange,
-        onLabelChange,
-      },
-    };
-    setNodes((nds) => { const u = [...nds, newNode]; setSavedNodes(u); return u; });
-  }, [setNodes, setSavedNodes, onDelete, onTextChange, onLabelChange]);
 
   const handleClearAll = useCallback(() => {
-    setNodes([]);
-    setEdges([]);
-    setSavedNodes([]);
-    setSavedEdges([]);
-  }, [setNodes, setEdges, setSavedNodes, setSavedEdges]);
+    setNodes([]); setEdges([]);
+    persistNodes([]); persistEdges([]);
+  }, [setNodes, setEdges, persistNodes, persistEdges]);
 
+  // Re-inject callbacks into loaded nodes (functions don't serialize)
   const nodesWithCbs = nodes.map((n) => ({
     ...n,
-    data: { ...n.data, onDelete, onTextChange, onLabelChange },
+    data: { ...n.data, onDelete, onUpdate },
   }));
 
   return (
@@ -128,14 +130,20 @@ export default function App() {
         >
           <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#2a2e3b" />
           <Controls showInteractive={false} />
-          <MiniMap nodeColor="#3b82f6" maskColor="rgba(15,17,23,0.8)" />
+          <MiniMap
+            nodeColor={(node) => {
+              const nt = (node.data as { nodeType?: string })?.nodeType;
+              return NODE_TYPES[nt || '']?.color || '#3b82f6';
+            }}
+            maskColor="rgba(15,17,23,0.8)"
+          />
         </ReactFlow>
 
         {nodes.length === 0 && (
           <div className="wf-empty-state">
             <div className="wf-empty-icon">+</div>
             <p className="wf-empty-title">Start building your workflow</p>
-            <p className="wf-empty-desc">Click Add Node in the sidebar</p>
+            <p className="wf-empty-desc">Click a node type in the sidebar</p>
           </div>
         )}
       </div>

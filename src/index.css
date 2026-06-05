@@ -47,23 +47,27 @@ body {
   letter-spacing: 0.05em; color: #52525b; margin-bottom: 8px;
 }
 
-.wf-add-btn {
+.wf-add-group { display: flex; flex-direction: column; gap: 4px; }
+.wf-add-type-btn {
   width: 100%;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
   border-radius: 10px;
-  border: 1px dashed #3b82f6;
-  background: rgba(59,130,246,0.06);
-  color: #3b82f6;
-  font-size: 14px; font-weight: 600;
+  border: 1px solid #2a2e3b;
+  background: transparent;
+  color: #e4e4e7;
+  font-size: 13px; font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
 }
-.wf-add-btn:hover {
-  background: rgba(59,130,246,0.14);
-  border-style: solid;
-  box-shadow: 0 0 20px rgba(59,130,246,0.1);
+.wf-add-type-icon {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 7px; flex-shrink: 0;
+  transition: transform 0.15s ease;
 }
+.wf-add-type-btn:hover .wf-add-type-icon { transform: scale(1.1); }
+.wf-add-type-label { text-align: left; flex: 1; }
 
 .wf-stat-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -109,6 +113,16 @@ body {
 .wf-drag-handle { color: #52525b; cursor: grab; flex-shrink: 0; }
 .wf-drag-handle:active { cursor: grabbing; }
 .wf-node-icon { color: #3b82f6; flex-shrink: 0; }
+.wf-node-type-icon {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; flex-shrink: 0;
+}
+.wf-node-badge {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 6px; border-radius: 4px;
+  flex-shrink: 0; white-space: nowrap;
+}
 .wf-node-title {
   flex: 1; font-size: 13px; font-weight: 600;
   color: #3b82f6; cursor: text; overflow: hidden;
