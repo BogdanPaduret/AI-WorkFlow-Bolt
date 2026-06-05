@@ -53,12 +53,25 @@ export default function App() {
   const [edges, setEdges, onEdgesChange] =
     useEdgesState(savedEdges);
 
+  // replace the create menu
+
+  const [createMenu, setCreateMenu] =
+    useState<{
+      screenX: number;
+      screenY: number;
+      flowX: number;
+      flowY: number;
+      sourceNodeId: string;
+    } | null>(null);
+  
+  /*
   const [createMenu, setCreateMenu] =
     useState<{
       x: number;
       y: number;
       sourceNodeId: string;
     } | null>(null);
+  */
 
   const persistNodes = useCallback(
     (ns: Node[]) => setSavedNodes(ns),
